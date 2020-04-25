@@ -10,7 +10,7 @@ gem 'pg', '~> 0.18'
 gem 'puma', '~> 4.1'
 gem 'rails', '~> 6.0.2', '>= 6.0.2.2'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
-# gem 'jbuilder', '~> 2.7'
+gem 'jbuilder', '~> 2.7'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 4.0'
 # Use Active Model has_secure_password
@@ -23,6 +23,7 @@ gem 'rails', '~> 6.0.2', '>= 6.0.2.2'
 gem 'bootsnap',      '>= 1.4.2', require: false
 gem 'fast_jsonapi',  '>= 1.5'
 gem 'rest-client'
+gem 'telegram-bot'
 
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS),
 # making cross-origin AJAX possible
@@ -31,7 +32,9 @@ gem 'rest-client'
 group :development, :test do
   gem 'factory_bot_rails', '~> 5.1.1'
   gem 'pry',               '~> 0.13.1'
-  gem 'rspec-rails',       '~> 3.8.2'
+  gem 'rspec-rails',       '~> 4.0.0'
+  gem 'rspec-its'
+  gem 'spring-commands-rspec'
 end
 
 group :development do
