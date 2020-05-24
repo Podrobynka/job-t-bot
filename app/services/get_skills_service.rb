@@ -5,7 +5,8 @@ class GetSkillsService < BaseService
 
   def call
     response =
-      RestClient.get(GET_SKILLS, Authorization: "Bearer #{FREELANCEHUNT_TOKEN}")
+      RestClient.get(GET_SKILLS, Authorization: "Bearer #{FREELANCEHUNT_TOKEN}",
+                                 'Accept-Language' => 'en')
 
     JSON.parse(response, symbolize_names: true)[:data]
   end

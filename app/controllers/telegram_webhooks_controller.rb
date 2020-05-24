@@ -4,11 +4,19 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::MessageContext
 
   def start!(*)
+    user
     respond_with :message, text: t('.content')
   end
 
   def help!(*)
     respond_with :message, text: t('.content')
+  end
+
+  def select_skills!(*)
+    # binding.pry
+    respond_with :message, text: t('.prompt'), reply_markup: {
+      inline_keyboard: skills_list
+    }
   end
 
   def memo!(*args)
@@ -54,11 +62,16 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def callback_query(data)
-    if data == 'alert'
-      answer_callback_query t('.alert'), show_alert: true
-    else
-      answer_callback_query t('.no_alert')
-    end
+    # binding.pry
+    skill_id = data.to_i
+    create_user_skills(skill_id)
+
+    answer_callback_query "#{show_skill(skill_id)[:name]} added to list", show_alert: true
+    # if data == 'alert'
+    #   answer_callback_query t('.alert'), show_alert: true
+    # else
+    #   answer_callback_query t('.no_alert')
+    # end
   end
 
   def message(message)
@@ -105,5 +118,32 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     else
       respond_with :message, text: t('telegram_webhooks.action_missing.feature', action: action)
     end
+  end
+
+  private
+
+  def user
+    @user ||= User.find_or_create_by(chat_id: chat['id'])
+  end
+
+  def skills_list
+    skills_list = []
+    skills.map do |skill|
+      skills_list << { text: skill[:name], callback_data: skill[:id] }
+    end
+
+    skills_list.each_slice(2).to_a
+  end
+
+  def skills
+    @skills ||= GetSkillsService.call
+  end
+
+  def show_skill(id)
+    skills.select { |skill| skill[:id] == id }.first
+  end
+
+  def create_user_skills(skill_id)
+    user.user_skills.find_or_create_by(skill_id: skill_id)
   end
 end
