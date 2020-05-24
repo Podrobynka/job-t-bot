@@ -33,5 +33,7 @@ module JobTBot
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    ::FREELANCEHUNT_TOKEN = YAML.load(File.read(Rails.root.join('config', 'freelancehunt.yml')))['auth_token']
   end
 end

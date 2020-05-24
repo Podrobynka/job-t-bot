@@ -74,3 +74,8 @@ en:
       nothing: Nothing to remind
     start:
       content: Hi there!
+    select_skills:
+      alert: Answer with alert
+      no_alert: Without alert
+      prompt: 'Select your skills:'
+      repo: Open gem repo
