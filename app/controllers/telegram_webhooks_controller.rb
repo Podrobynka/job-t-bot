@@ -2,6 +2,7 @@
 
 class TelegramWebhooksController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::MessageContext
+  include Telegram::Bot::UpdatesController::CallbackQueryContext
 
   def start!(*)
     user
@@ -62,16 +63,13 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def callback_query(data)
-    # binding.pry
-    skill_id = data.to_i
-    create_user_skills(skill_id)
+    send(*JSON.parse(data, symbolize_names: true).to_a.first)
+  end
 
-    answer_callback_query "#{show_skill(skill_id)[:name]} added to list", show_alert: true
-    # if data == 'alert'
-    #   answer_callback_query t('.alert'), show_alert: true
-    # else
-    #   answer_callback_query t('.no_alert')
-    # end
+  def select_skill_callback_query(skill_id)
+    create_user_skills(skill_id)
+    answer_callback_query("#{show_skill(skill_id)[:name]} added to list",
+                          show_alert: true)
   end
 
   def message(message)
@@ -129,7 +127,10 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   def skills_list
     skills_list = []
     skills.map do |skill|
-      skills_list << { text: skill[:name], callback_data: skill[:id] }
+      skills_list << {
+        text: skill[:name],
+        callback_data: { select_skill_callback_query: skill[:id] }.to_json
+      }
     end
 
     skills_list.each_slice(2).to_a
