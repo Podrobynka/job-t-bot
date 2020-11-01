@@ -75,7 +75,10 @@ en:
     start:
       content: Hi there!
     select_skills:
-      alert: Answer with alert
+      alert: "%{text} added to the list"
       no_alert: Without alert
       prompt: 'Select your skills:'
       repo: Open gem repo
+    delete_skills:
+      prompt: 'Delete skills:'
+      alert: "%{text} deleted from the list"

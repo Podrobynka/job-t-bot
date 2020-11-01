@@ -14,34 +14,32 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def select_skills!(*)
-    # binding.pry
     respond_with :message, text: t('.prompt'), reply_markup: {
-      inline_keyboard: skills_list(all_skills)
+      inline_keyboard: skills_list(NotUserSkillsService.call(user), 'select_skill_')
     }
   end
 
   def delete_skills!(*)
-    # binding.pry
     respond_with :message, text: t('.prompt'), reply_markup: {
-      inline_keyboard: skills_list(user_skills)
+      inline_keyboard: skills_list(UserSkillsService.call(user), 'delete_skill_')
     }
   end
 
-  def memo!(*args)
-    if args.any?
-      session[:memo] = args.join(' ')
-      respond_with :message, text: t('.notice')
-    else
-      respond_with :message, text: t('.prompt')
-      save_context :memo!
-    end
-  end
+  # def memo!(*args)
+  #   if args.any?
+  #     session[:memo] = args.join(' ')
+  #     respond_with :message, text: t('.notice')
+  #   else
+  #     respond_with :message, text: t('.prompt')
+  #     save_context :memo!
+  #   end
+  # end
 
-  def remind_me!(*)
-    to_remind = session.delete(:memo)
-    reply = to_remind || t('.nothing')
-    respond_with :message, text: reply
-  end
+  # def remind_me!(*)
+  #   to_remind = session.delete(:memo)
+  #   reply = to_remind || t('.nothing')
+  #   respond_with :message, text: reply
+  # end
 
   def keyboard!(value = nil, *)
     if value
@@ -74,15 +72,19 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def select_skill_callback_query(skill_id)
-    create_user_skills(skill_id)
-    answer_callback_query("#{show_skill(skill_id)[:name]} added to list",
-                          show_alert: true)
+    CreateUserSkillsService.call(user, skill_id)
+
+    answer_callback_query(
+      t('.select_skills.alert', text: show_skill(skill_id)[:name]), show_alert: true
+    )
   end
 
   def delete_skill_callback_query(skill_id)
-    delete_user_skills(skill_id)
-    answer_callback_query("#{show_skill(skill_id)[:name]} deleted from list",
-                          show_alert: true)
+    DeleteUserSkillsService.call(user, skill_id)
+
+    answer_callback_query(
+      t('.delete_skills.alert', text: show_skill(skill_id)[:name]), show_alert: true
+    )
   end
 
   def message(message)
@@ -109,27 +111,27 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   # As there is no chat id in such requests, we can not respond instantly.
   # So we just save the result_id, and it's available then with `/last_chosen_inline_result`.
-  def chosen_inline_result(result_id, _query)
-    session[:last_chosen_inline_result] = result_id
-  end
+  # def chosen_inline_result(result_id, _query)
+  #   session[:last_chosen_inline_result] = result_id
+  # end
 
-  def last_chosen_inline_result!(*)
-    result_id = session[:last_chosen_inline_result]
-    if result_id
-      respond_with :message, text: t('.selected', result_id: result_id)
-    else
-      respond_with :message, text: t('.prompt')
-    end
-  end
+  # def last_chosen_inline_result!(*)
+  #   result_id = session[:last_chosen_inline_result]
+  #   if result_id
+  #     respond_with :message, text: t('.selected', result_id: result_id)
+  #   else
+  #     respond_with :message, text: t('.prompt')
+  #   end
+  # end
 
-  def action_missing(action, *_args)
-    if action_type == :command
-      respond_with :message,
-                   text: t('telegram_webhooks.action_missing.command', command: action_options[:command])
-    else
-      respond_with :message, text: t('telegram_webhooks.action_missing.feature', action: action)
-    end
-  end
+  # def action_missing(action, *_args)
+  #   if action_type == :command
+  #     respond_with :message,
+  #                  text: t('telegram_webhooks.action_missing.command', command: action_options[:command])
+  #   else
+  #     respond_with :message, text: t('telegram_webhooks.action_missing.feature', action: action)
+  #   end
+  # end
 
   private
 
@@ -137,36 +139,19 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     @user ||= User.find_or_create_by(chat_id: chat['id'])
   end
 
-  def skills_list(skills)
+  def skills_list(skills, action_key = nil)
     skills_list = []
     skills.map do |skill|
       skills_list << {
         text: skill[:name],
-        callback_data: { select_skill_callback_query: skill[:id] }.to_json
+        callback_data: { "#{action_key}callback_query": skill[:id] }.to_json
       }
     end
 
     skills_list.each_slice(2).to_a
   end
 
-  def all_skills
-    @all_skills ||= GetSkillsService.call
-  end
-
-  def user_skills
-    binding.pry
-    all_skills.select { |el| user.user_skills.pluck(:skill_id).include?(el[:id]) }
-  end
-
   def show_skill(id)
-    all_skills.select { |skill| all_skills[:id] == id }.first
-  end
-
-  def create_user_skills(skill_id)
-    user.user_skills.find_or_create_by(skill_id: skill_id)
-  end
-
-  def delete_user_skills(skill_id)
-    user.user_skills.find(skill_id: skill_id).delete
+    GetSkillsService.call.select { |skill| skill[:id] == id }.first
   end
 end
