@@ -40,13 +40,10 @@ en:
     help:
       content: |
         Available cmds:
-        /memo %text% - Saves text to session.
-        /remind_me - Replies with text from session.
-        /keyboard - Simple keyboard.
-        /inline_keyboard - Inline keyboard example.
-        Bot supports inline queries. Enable it in @BotFather.
-        /last_chosen_inline_result - Your last chosen inline result \
-        (Enable feedback with /setinlinefeedback).
+        /select_skills - Select your skills from the list to receive updates.
+        /delete_skills - Delete skills from your list.
+        /keyboard - Reload keyboard.
+        /help - Show list of commands.
     inline_keyboard:
       alert: Answer with alert
       no_alert: Without alert
@@ -57,8 +54,10 @@ en:
       description: Description
     keyboard:
       buttons:
-        - Lorem
-        - Ipsum
+        - /help
+        - /select_skills
+        - /delete_skills
+        - Show jobs
         - /cancel
       prompt: 'Select something with keyboard:'
       selected: "You've selected: %{value}"

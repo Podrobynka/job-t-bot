@@ -55,17 +55,17 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     end
   end
 
-  def inline_keyboard!(*)
-    respond_with :message, text: t('.prompt'), reply_markup: {
-      inline_keyboard: [
-        [
-          { text: t('.alert'), callback_data: 'alert' },
-          { text: t('.no_alert'), callback_data: 'no_alert' }
-        ],
-        [{ text: t('.repo'), url: 'https://github.com/telegram-bot-rb/telegram-bot' }]
-      ]
-    }
-  end
+  # def inline_keyboard!(*)
+  #   respond_with :message, text: t('.prompt'), reply_markup: {
+  #     inline_keyboard: [
+  #       [
+  #         { text: t('.alert'), callback_data: 'alert' },
+  #         { text: t('.no_alert'), callback_data: 'no_alert' }
+  #       ],
+  #       [{ text: t('.repo'), url: 'https://github.com/telegram-bot-rb/telegram-bot' }]
+  #     ]
+  #   }
+  # end
 
   def callback_query(data)
     send(*JSON.parse(data, symbolize_names: true).to_a.first)
@@ -74,40 +74,51 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   def select_skill_callback_query(skill_id)
     CreateUserSkillsService.call(user, skill_id)
 
-    answer_callback_query(
-      t('.select_skills.alert', text: show_skill(skill_id)[:name]), show_alert: true
+    bot.edit_message_text(
+      chat_id: chat['id'],
+      message_id: payload.dig('message', 'message_id'),
+      text: t('.select_skills.prompt'),
+      reply_markup: {
+        inline_keyboard: skills_list(NotUserSkillsService.call(user), 'select_skill_')
+      }
     )
   end
 
   def delete_skill_callback_query(skill_id)
     DeleteUserSkillsService.call(user, skill_id)
 
-    answer_callback_query(
-      t('.delete_skills.alert', text: show_skill(skill_id)[:name]), show_alert: true
+    bot.edit_message_text(
+      chat_id: chat['id'],
+      message_id: payload.dig('message', 'message_id'),
+      text: t('.delete_skills.prompt'),
+      reply_markup: {
+        inline_keyboard: skills_list(UserSkillsService.call(user), 'delete_skill_')
+      }
     )
   end
 
-  def message(message)
-    respond_with :message, text: t('.content', text: message['text'])
-  end
+  # def message(message)
+  #   # edit_message_text(chat_id: message['chat']['id'], message_id: message['message_id'], text: "edited message" )
+  #   respond_with :message, text: t('.content', text: message['text'])
+  # end
 
-  def inline_query(query, _offset)
-    query = query.first(10) # it's just an example, don't use large queries.
-    t_description = t('.description')
-    t_content = t('.content')
-    results = Array.new(5) do |i|
-      {
-        type: :article,
-        title: "#{query}-#{i}",
-        id: "#{query}-#{i}",
-        description: "#{t_description} #{i}",
-        input_message_content: {
-          message_text: "#{t_content} #{i}"
-        }
-      }
-    end
-    answer_inline_query results
-  end
+  # def inline_query(query, _offset)
+  #   query = query.first(10) # it's just an example, don't use large queries.
+  #   t_description = t('.description')
+  #   t_content = t('.content')
+  #   results = Array.new(5) do |i|
+  #     {
+  #       type: :article,
+  #       title: "#{query}-#{i}",
+  #       id: "#{query}-#{i}",
+  #       description: "#{t_description} #{i}",
+  #       input_message_content: {
+  #         message_text: "#{t_content} #{i}"
+  #       }
+  #     }
+  #   end
+  #   answer_inline_query results
+  # end
 
   # As there is no chat id in such requests, we can not respond instantly.
   # So we just save the result_id, and it's available then with `/last_chosen_inline_result`.
