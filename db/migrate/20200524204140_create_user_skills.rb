@@ -1,0 +1,12 @@
+# frozen_string_literal: true
+
+class CreateUserSkills < ActiveRecord::Migration[6.0]
+  def change
+    create_table :user_skills do |t|
+      t.integer :user_id
+      t.integer :skill_id
+
+      t.timestamps
+    end
+  end
+end
