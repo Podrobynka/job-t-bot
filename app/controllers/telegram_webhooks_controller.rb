@@ -25,21 +25,17 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     }
   end
 
-  # def memo!(*args)
-  #   if args.any?
-  #     session[:memo] = args.join(' ')
-  #     respond_with :message, text: t('.notice')
-  #   else
-  #     respond_with :message, text: t('.prompt')
-  #     save_context :memo!
-  #   end
-  # end
+  def new_projects!(*)
+    last_time = session.delete(:projects_check_time)
+    session[:projects_check_time] =
+      user_skills_ids.each_with_object({}) { |s_id, h| h[s_id] = Time.now }
 
-  # def remind_me!(*)
-  #   to_remind = session.delete(:memo)
-  #   reply = to_remind || t('.nothing')
-  #   respond_with :message, text: reply
-  # end
+    show_projects('new_projects', last_time)
+  end
+
+  def all_projects!(*)
+    show_projects('all_projects')
+  end
 
   def keyboard!(value = nil, *)
     if value
@@ -54,18 +50,6 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
       }
     end
   end
-
-  # def inline_keyboard!(*)
-  #   respond_with :message, text: t('.prompt'), reply_markup: {
-  #     inline_keyboard: [
-  #       [
-  #         { text: t('.alert'), callback_data: 'alert' },
-  #         { text: t('.no_alert'), callback_data: 'no_alert' }
-  #       ],
-  #       [{ text: t('.repo'), url: 'https://github.com/telegram-bot-rb/telegram-bot' }]
-  #     ]
-  #   }
-  # end
 
   def callback_query(data)
     send(*JSON.parse(data, symbolize_names: true).to_a.first)
@@ -97,53 +81,6 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     )
   end
 
-  # def message(message)
-  #   # edit_message_text(chat_id: message['chat']['id'], message_id: message['message_id'], text: "edited message" )
-  #   respond_with :message, text: t('.content', text: message['text'])
-  # end
-
-  # def inline_query(query, _offset)
-  #   query = query.first(10) # it's just an example, don't use large queries.
-  #   t_description = t('.description')
-  #   t_content = t('.content')
-  #   results = Array.new(5) do |i|
-  #     {
-  #       type: :article,
-  #       title: "#{query}-#{i}",
-  #       id: "#{query}-#{i}",
-  #       description: "#{t_description} #{i}",
-  #       input_message_content: {
-  #         message_text: "#{t_content} #{i}"
-  #       }
-  #     }
-  #   end
-  #   answer_inline_query results
-  # end
-
-  # As there is no chat id in such requests, we can not respond instantly.
-  # So we just save the result_id, and it's available then with `/last_chosen_inline_result`.
-  # def chosen_inline_result(result_id, _query)
-  #   session[:last_chosen_inline_result] = result_id
-  # end
-
-  # def last_chosen_inline_result!(*)
-  #   result_id = session[:last_chosen_inline_result]
-  #   if result_id
-  #     respond_with :message, text: t('.selected', result_id: result_id)
-  #   else
-  #     respond_with :message, text: t('.prompt')
-  #   end
-  # end
-
-  # def action_missing(action, *_args)
-  #   if action_type == :command
-  #     respond_with :message,
-  #                  text: t('telegram_webhooks.action_missing.command', command: action_options[:command])
-  #   else
-  #     respond_with :message, text: t('telegram_webhooks.action_missing.feature', action: action)
-  #   end
-  # end
-
   private
 
   def user
@@ -164,5 +101,35 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def show_skill(id)
     GetSkillsService.call.select { |skill| skill[:id] == id }.first
+  end
+
+  def user_skills_ids
+    user.user_skills.pluck(:skill_id)
+  end
+
+  def projects(date = nil)
+    if date.is_a?(Hash)
+      GetProjectsBySkillsService.call(user_skills_ids, date)
+    else
+      GetProjectsService.call(user_skills_ids, date)
+    end
+  end
+
+  def project(item)
+    [item.dig(:attributes, :name), "\n",
+     item.dig(:attributes, :skills).pluck(:name).join(', '), "\n",
+     item.dig(:links, :self, :web)].join
+  end
+
+  def show_projects(action_key, date = nil)
+    if user_skills_ids.empty?
+      respond_with :message, text: t(".#{action_key}.no_skills_selected")
+    elsif projects(date).empty?
+      respond_with :message, text: t(".#{action_key}.no_projects")
+    else
+      projects(date).each do |pr|
+        respond_with :message, text: project(pr)
+      end
+    end
   end
 end

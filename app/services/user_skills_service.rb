@@ -1,17 +1,9 @@
 # frozen_string_literal: true
 
-class UserSkillsService < BaseService
-  def initialize(user)
-    @user = user
-  end
-
+class UserSkillsService < BaseUserSkillsService
   def call
     GetSkillsService.call.select do |el|
-      user.user_skills.pluck(:skill_id).include?(el[:id])
+      user_skill_ids.include?(el[:id])
     end
   end
-
-  private
-
-  attr_reader :user
 end

@@ -42,6 +42,7 @@ en:
         Available cmds:
         /select_skills - Select your skills from the list to receive updates.
         /delete_skills - Delete skills from your list.
+        /new_projects - Show new progects.
         /keyboard - Reload keyboard.
         /help - Show list of commands.
     inline_keyboard:
@@ -57,7 +58,8 @@ en:
         - /help
         - /select_skills
         - /delete_skills
-        - Show jobs
+        - /new_projects
+        - /all_projects
         - /cancel
       prompt: 'Select something with keyboard:'
       selected: "You've selected: %{value}"
@@ -81,3 +83,17 @@ en:
     delete_skills:
       prompt: 'Delete skills:'
       alert: "%{text} deleted from the list"
+    new_projects:
+      no_skills_selected: |
+        Please, select your skills to receive project updates.
+        You can do it with the following command: /select_skills
+      no_projects: |
+        Unfortunately, there are no new projects for your skills.
+        You can look up older ones: /all_projects
+    all_projects:
+      no_skills_selected: |
+        Please, select your skills to receive project updates.
+        You can do it with the following command: /select_skills
+      no_projects: |
+        Unfortunately, there are no new projects for your skills.
+        You can add more skills with the following command: /select_skills
