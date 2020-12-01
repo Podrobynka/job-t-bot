@@ -15,13 +15,13 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def select_skills!(*)
     respond_with :message, text: t('.prompt'), reply_markup: {
-      inline_keyboard: skills_list(NotUserSkillsService.call(user), 'select_skill_')
+      inline_keyboard: skills_list(UserSkills::NotUserSkillsService.call(user), 'select_skill_')
     }
   end
 
   def delete_skills!(*)
     respond_with :message, text: t('.prompt'), reply_markup: {
-      inline_keyboard: skills_list(UserSkillsService.call(user), 'delete_skill_')
+      inline_keyboard: skills_list(UserSkills::UserSkillsService.call(user), 'delete_skill_')
     }
   end
 
@@ -56,27 +56,27 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def select_skill_callback_query(skill_id)
-    CreateUserSkillsService.call(user, skill_id)
+    UserSkills::CreateService.call(user, skill_id)
 
     bot.edit_message_text(
       chat_id: chat['id'],
       message_id: payload.dig('message', 'message_id'),
       text: t('.select_skills.prompt'),
       reply_markup: {
-        inline_keyboard: skills_list(NotUserSkillsService.call(user), 'select_skill_')
+        inline_keyboard: skills_list(UserSkills::NotUserSkillsService.call(user), 'select_skill_')
       }
     )
   end
 
   def delete_skill_callback_query(skill_id)
-    DeleteUserSkillsService.call(user, skill_id)
+    UserSkills::DeleteService.call(user, skill_id)
 
     bot.edit_message_text(
       chat_id: chat['id'],
       message_id: payload.dig('message', 'message_id'),
       text: t('.delete_skills.prompt'),
       reply_markup: {
-        inline_keyboard: skills_list(UserSkillsService.call(user), 'delete_skill_')
+        inline_keyboard: skills_list(UserSkills::UserSkillsService.call(user), 'delete_skill_')
       }
     )
   end
@@ -109,9 +109,9 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def projects(date = nil)
     if date.is_a?(Hash)
-      GetProjectsBySkillsService.call(user_skills_ids, date)
+      Freelancehunt::GetProjectsBySkillsService.call(user_skills_ids, date)
     else
-      GetProjectsService.call(user_skills_ids, date)
+      Freelancehunt::GetProjectsService.call(user_skills_ids, date)
     end
   end
 
