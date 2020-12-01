@@ -30,10 +30,15 @@ gem 'telegram-bot'
 # gem 'rack-cors'
 
 group :development, :test do
+  gem 'database_cleaner-active_record'
   gem 'factory_bot_rails', '~> 5.1.1'
   gem 'pry',               '~> 0.13.1'
-  gem 'rspec-rails',       '~> 4.0.0'
   gem 'rspec-its'
+  gem 'rspec-rails', '~> 4.0.0'
+  gem 'rubocop'
+  gem 'rubocop-performance'
+  gem 'rubocop-rails'
+  gem 'rubocop-rspec'
   gem 'spring-commands-rspec'
 end
 
