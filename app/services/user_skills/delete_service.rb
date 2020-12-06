@@ -8,7 +8,7 @@ module UserSkills
     end
 
     def call
-      user.user_skills.find_by(skill_id: skill_id).delete
+      user.user_skills.find_by(skill_id: skill_id)&.delete
     end
 
     private

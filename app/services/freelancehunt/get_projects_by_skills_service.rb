@@ -4,7 +4,7 @@ module Freelancehunt
   class GetProjectsBySkillsService < Freelancehunt::BaseApiService
     def initialize(skill_ids, checked_at)
       @skill_ids = skill_ids
-      @checked_at = checked_at
+      @checked_at = checked_at || {}
     end
 
     def call

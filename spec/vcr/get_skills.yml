@@ -1,0 +1,76 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://api.freelancehunt.com/v2/skills
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.1 (darwin19.6.0 x86_64) ruby/2.6.3p62
+      Authorization:
+      - Bearer a0a3e9222c82e995816ae69161ff69c2c80ee362
+      Accept-Language:
+      - en
+      Host:
+      - api.freelancehunt.com
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sun, 06 Dec 2020 20:24:58 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      Set-Cookie:
+      - __cfduid=deba344b4a271c562479cf62048c12dac1607286298; expires=Tue, 05-Jan-21
+        20:24:58 GMT; path=/; domain=.freelancehunt.com; HttpOnly; SameSite=Lax; Secure
+      Cf-Ray:
+      - 5fd8bbc2ead12dea-KBP
+      Cache-Control:
+      - no-cache, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Language:
+      - en
+      Expires:
+      - '0'
+      Strict-Transport-Security:
+      - max-age=31536000
+      Vary:
+      - Accept-Encoding, Accept
+      Cf-Cache-Status:
+      - EXPIRED
+      Cf-Request-Id:
+      - 06db53add000002dea31863000000001
+      Expect-Ct:
+      - max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+      X-Auth-Status:
+      - 'true'
+      X-Powered-By:
+      - api.freelancehunt.com
+      X-Ratelimit-Limit:
+      - 1200 per hour
+      X-Ratelimit-Remaining:
+      - '1199'
+      X-Request-Id:
+      - 5fd8bbc531d12dea-LHR
+      Server:
+      - cloudflare
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        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
+    http_version:
+  recorded_at: Sun, 06 Dec 2020 20:24:58 GMT
+recorded_with: VCR 5.1.0
