@@ -99,10 +99,6 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     skills_list.each_slice(2).to_a
   end
 
-  def show_skill(id)
-    GetSkillsService.call.select { |skill| skill[:id] == id }.first
-  end
-
   def user_skills_ids
     user.user_skills.pluck(:skill_id)
   end

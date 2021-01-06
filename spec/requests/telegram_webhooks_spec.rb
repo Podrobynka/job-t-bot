@@ -1,32 +1,126 @@
 # frozen_string_literal: true
+require 'rails_helper'
 require 'telegram/bot/rspec/integration/rails'
+vcr = { cassette_name: 'get_skills' }
+vcr_projects_by_skills = { cassette_name: 'new_projects_by_skills_1' }
 
 RSpec.describe TelegramWebhooksController, telegram_bot: :rails do
+  let(:skill_id) { 56 }
+  let(:chat_id) { 456 }
+
   def reply
     bot.requests[:sendMessage].last
   end
 
-  describe '#start!' do
-    subject { -> { dispatch_command :start } }
-    it { should respond_with_message 'Hi there!' }
+  shared_examples 'shows keyboard' do
+    it 'shows keyboard' do
+      should respond_with_message message
+      expect(reply[:reply_markup]).to be_present
+    end
   end
 
-  describe 'memoizing with /memo' do
-    let(:memo) { ->(text) { dispatch_command :memo, text } }
-    let(:remind_me) { -> { dispatch_command :remind_me } }
-    let(:text) { 'asd qwe' }
-
-    it 'memoizes from the single message' do
-      expect(&remind_me).to respond_with_message 'Nothing to remind'
-      expect { memo[text] }.to respond_with_message 'Remembered!'
-      expect(&remind_me).to respond_with_message text
-      expect(&remind_me).to respond_with_message 'Nothing to remind'
+  describe '#start!' do
+    let(:message) do
+      "Hi there!\nYou can get list of available commands with /help option.\n"
     end
 
-    it 'memoizes text from subsequest message' do
-      expect { memo[''] }.to respond_with_message 'What should I remember?'
-      expect { dispatch_message text }.to respond_with_message 'Remembered!'
-      expect(&remind_me).to respond_with_message text
+    subject { -> { dispatch_command :start } }
+    it { should respond_with_message message }
+  end
+
+  describe '#help!' do
+    let(:message) do
+      "Available cmds:\n/select_skills - Select your skills from the list to " \
+      "receive updates.\n/delete_skills - Delete skills from your list.\n" \
+      "/new_projects - Show new progects.\n/keyboard - Reload keyboard.\n" \
+      "/help - Show list of commands.\n"
+    end
+
+    subject { -> { dispatch_command :help } }
+    it { should respond_with_message message }
+  end
+
+  describe '#select_skills!', vcr: vcr do
+    let(:message) { 'Select your skills:' }
+
+    subject { -> { dispatch_command :select_skills } }
+    include_examples 'shows keyboard'
+  end
+
+  describe '#delete_skills!', vcr: vcr do
+    let(:message) { 'Delete skills:' }
+
+    subject { -> { dispatch_command :delete_skills } }
+    include_examples 'shows keyboard'
+  end
+
+  describe '#new_projects!' do
+    subject { -> { dispatch_command :new_projects } }
+
+    context 'when user didn\'t select skills' do
+      let(:message) do
+        "Please, select your skills to receive project updates.\n" \
+        "You can do it with the following command: /select_skills\n"
+      end
+
+      it { should respond_with_message message }
+    end
+
+    context 'when user selected skills', vcr: vcr_projects_by_skills do
+      let(:user) { create(:user, chat_id: chat_id) }
+      let!(:user_skill) { create(:user_skill, user: user) }
+
+      context 'when user didn\'t check projects' do
+        let(:message) do
+          "Форма загрузки файлов с поддержкой .tiff на WP\nPHP, Web programming" \
+          "\nhttps://freelancehunt.com/project/forma-zagruzki-faylov-podderzhko" \
+          'y-tiff/812694.html'
+        end
+
+        it { should respond_with_message message }
+      end
+
+      context 'when user checked projects' do
+        let(:last_checked) { { projects_check_time: { 1 => Time.now } } }
+        let(:message) do
+          "Unfortunately, there are no new projects for your skills.\n" \
+          "You can look up older ones: /all_projects\n"
+        end
+
+        before do
+          allow_any_instance_of(TelegramWebhooksController).to receive(:session).and_return(last_checked)
+        end
+
+        it { should respond_with_message message }
+      end
+    end
+  end
+
+  describe '#all_projects!' do
+    subject { -> { dispatch_command :all_projects } }
+
+    context 'when user didn\'t select skills' do
+      let(:message) do
+        "Please, select your skills to receive project updates.\n" \
+        "You can do it with the following command: /select_skills\n"
+      end
+
+      it { should respond_with_message message }
+    end
+
+    context 'when user selected skills', vcr: vcr_projects_by_skills do
+      let(:user) { create(:user, chat_id: chat_id) }
+      let!(:user_skill) { create(:user_skill, user: user) }
+
+      context 'when user didn\'t check projects' do
+        let(:message) do
+          "Форма загрузки файлов с поддержкой .tiff на WP\nPHP, Web " \
+          "programming\nhttps://freelancehunt.com/project/forma-zagruzki-" \
+          'faylov-podderzhkoy-tiff/812694.html'
+        end
+
+        it { should respond_with_message message }
+      end
     end
   end
 
@@ -44,36 +138,36 @@ RSpec.describe TelegramWebhooksController, telegram_bot: :rails do
     end
   end
 
-  describe '#message' do
-    subject { -> { dispatch_message text } }
-    let(:text) { 'some plain text' }
-    it { should respond_with_message "You wrote: #{text}" }
-  end
+  describe '#select_skill_callback_query', :select_skill_callback_query, vcr: vcr do
+    let(:data) { { select_skill_callback_query: skill_id }.to_json }
 
-  describe '#chosen_inline_result' do
-    subject { -> { dispatch(chosen_inline_result: payload) } }
-    let(:fetch) { -> { dispatch_command :last_chosen_inline_result } }
-    let(:payload) { { from: { id: 123 }, result_id: 456 } }
+    shared_examples 'one user_skill exists' do
+      it 'creates user skill' do
+        should edit_current_message(:text, text: 'Select your skills:')
+        expect(UserSkill.count).to eq(1)
+      end
+    end
 
-    it 'memoizes chosen_inline_result' do
-      expect(&fetch).to respond_with_message 'Mention me to initiate inline query'
-      subject.call
-      expect(&fetch).to respond_with_message "You've chosen result ##{payload[:result_id]}"
+    context 'when no user_skill exists' do
+      include_examples 'one user_skill exists'
+    end
+
+    context 'when user_skill exists' do
+      let(:user) { create(:user, chat_id: chat_id) }
+      let!(:user_skill) { create(:user_skill, user: user, skill_id: skill_id) }
+
+      include_examples 'one user_skill exists'
     end
   end
 
-  describe 'for unsupported command' do
-    subject { -> { dispatch_command :makeMeGreatBot } }
-    it { should respond_with_message 'Can not perform makeMeGreatBot' }
-  end
+  describe '#delete_skill_callback_query', :delete_skill_callback_query, vcr: vcr do
+    let(:data) { { delete_skill_callback_query: skill_id }.to_json }
+    let(:user) { create(:user, chat_id: chat_id) }
+    let!(:user_skill) { create(:user_skill, user: user, skill_id: skill_id) }
 
-  describe '#callback_query', :callback_query do
-    let(:data) { 'no_alert' }
-    it { should answer_callback_query('Simple answer') }
-
-    context 'with alert' do
-      let(:data) { 'alert' }
-      it { should answer_callback_query(/ALERT/) }
+    it 'deletes user skill' do
+      should edit_current_message(:text, text: 'Delete skills:')
+      expect(UserSkill.count).to eq(0)
     end
   end
 end

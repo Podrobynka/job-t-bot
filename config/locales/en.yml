@@ -74,7 +74,9 @@ en:
     remind_me:
       nothing: Nothing to remind
     start:
-      content: Hi there!
+      content: |
+        Hi there!
+        You can get list of available commands with /help option.
     select_skills:
       alert: "%{text} added to the list"
       no_alert: Without alert
