@@ -67,7 +67,7 @@ yarn-debug.log*
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
-/config/*.yml
 */.DS_Store
 */**/.DS_Store
 .DS_Store
+/config/freelancehunt.yml
