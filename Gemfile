@@ -31,6 +31,7 @@ gem 'telegram-bot'
 
 group :development, :test do
   gem 'database_cleaner-active_record'
+  gem 'dotenv-rails'
   gem 'factory_bot_rails', '~> 5.1.1'
   gem 'pry',               '~> 0.13.1'
   gem 'rspec-its'

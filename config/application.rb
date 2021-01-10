@@ -34,13 +34,6 @@ module JobTBot
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
-    ::FREELANCEHUNT_TOKEN =
-      if Rails.env.production?
-        ENV['FREELANCEHUNT_TOKEN']
-      else
-        YAML.safe_load(
-          File.read(Rails.root.join('config', 'freelancehunt.yml'))
-        )['auth_token']
-      end
+    ::FREELANCEHUNT_TOKEN = ENV['FREELANCEHUNT_TOKEN']
   end
 end
