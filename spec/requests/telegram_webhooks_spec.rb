@@ -68,9 +68,9 @@ RSpec.describe TelegramWebhooksController, telegram_bot: :rails do
 
     context 'when user selected skills', vcr: vcr_projects_by_skills do
       let(:user) { create(:user, chat_id: chat_id) }
-      let!(:user_skill) { create(:user_skill, user: user) }
 
       context 'when user didn\'t check projects' do
+        let!(:user_skill) { create(:user_skill, user: user) }
         let(:message) do
           "Форма загрузки файлов с поддержкой .tiff на WP\nPHP, Web programming" \
           "\nhttps://freelancehunt.com/project/forma-zagruzki-faylov-podderzhko" \
@@ -81,14 +81,10 @@ RSpec.describe TelegramWebhooksController, telegram_bot: :rails do
       end
 
       context 'when user checked projects' do
-        let(:last_checked) { { projects_check_time: { 1 => Time.now } } }
+        let!(:user_skill) { create(:user_skill, user: user, checked_at: Time.now) }
         let(:message) do
           "Unfortunately, there are no new projects for your skills.\n" \
           "You can look up older ones: /all_projects\n"
-        end
-
-        before do
-          allow_any_instance_of(TelegramWebhooksController).to receive(:session).and_return(last_checked)
         end
 
         it { should respond_with_message message }

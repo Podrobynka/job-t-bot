@@ -26,9 +26,8 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def new_projects!(*)
-    last_time = session.delete(:projects_check_time)
-    session[:projects_check_time] =
-      user_skills_ids.each_with_object({}) { |s_id, h| h[s_id] = Time.now }
+    last_time = user.user_skills.pluck(:skill_id, :checked_at).to_h
+    user.user_skills.update_all(checked_at: Time.now)
 
     show_projects('new_projects', last_time)
   end
