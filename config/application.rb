@@ -34,6 +34,9 @@ module JobTBot
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
+    # Custom directories with classes and modules you want to be autoloadable.
+    config.autoload_paths += %W(#{config.root}/lib)
+
     ::FREELANCEHUNT_TOKEN = ENV['FREELANCEHUNT_TOKEN']
   end
 end
