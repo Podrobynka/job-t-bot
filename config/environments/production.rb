@@ -105,4 +105,8 @@ Rails.application.configure do
   # config.active_record.database_selector = { delay: 2.seconds }
   # config.active_record.database_resolver = ActiveRecord::Middleware::DatabaseSelector::Resolver
   # config.active_record.database_resolver_context = ActiveRecord::Middleware::DatabaseSelector::Resolver::Session
+
+  # Redis
+  config.cache_store = :redis_store, "#{ENV['REDIS_URL']}/0/cache", { expires_in: 10.minutes }
+  config.active_record.cache_versioning = false
 end

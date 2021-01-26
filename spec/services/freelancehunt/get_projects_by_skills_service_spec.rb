@@ -35,6 +35,15 @@ RSpec.describe Freelancehunt::GetProjectsBySkillsService, :aggregate_failures do
 
     include_examples 'fetches projects'
     include_examples 'fetches projects data'
+
+    context 'with cached request' do
+      let(:times) { 0 }
+
+      before { described_class.call(skill_ids, checked_at) }
+
+      include_examples 'fetches projects'
+      include_examples 'fetches projects data'
+    end
   end
 
   context 'with published_at' do

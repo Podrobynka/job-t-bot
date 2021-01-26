@@ -50,6 +50,14 @@ RSpec.describe Freelancehunt::GetProjectsService, :aggregate_failures, vcr: vcr 
     let(:times) { 19 }
 
     include_examples 'fetches projects'
+
+    context 'with cached request' do
+      let(:times) { 0 }
+
+      before { described_class.call(skill_ids, published_at) }
+
+      include_examples 'fetches projects'
+    end
   end
 
   context 'with skill_ids and published_at', vcr: vcr_skills_published_at do
