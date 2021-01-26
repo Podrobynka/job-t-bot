@@ -56,4 +56,8 @@ Rails.application.configure do
 
   # <ngrok http 3000>
   # config.hosts << "ab90faf9.ngrok.io"
+
+  # Redis
+  config.cache_store = :redis_store, 'redis://localhost:6379/0/cache', { expires_in: 10.minutes }
+  config.active_record.cache_versioning = false
 end

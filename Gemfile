@@ -12,7 +12,7 @@ gem 'rails', '~> 6.0.2', '>= 6.0.2.2'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.7'
 # Use Redis adapter to run Action Cable in production
-# gem 'redis', '~> 4.0'
+gem 'redis-rails'
 # Use Active Model has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
@@ -33,7 +33,7 @@ group :development, :test do
   gem 'database_cleaner-active_record'
   gem 'dotenv-rails'
   gem 'factory_bot_rails', '~> 5.1.1'
-  gem 'pry',               '~> 0.13.1'
+  gem 'pry-rails'
   gem 'rspec-its'
   gem 'rspec-rails', '~> 4.0.0'
   gem 'rubocop'

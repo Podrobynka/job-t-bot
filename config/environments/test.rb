@@ -51,4 +51,8 @@ Rails.application.configure do
 
   # Stub clients before processing routes.rb.
   Telegram::Bot::ClientStub.stub_all!
+
+  # Redis
+  config.cache_store = :redis_store, 'redis://localhost:6379/0/cache', { expires_in: 10.minutes }
+  config.active_record.cache_versioning = false
 end
