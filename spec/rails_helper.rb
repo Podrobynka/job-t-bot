@@ -5,6 +5,9 @@ ENV['RAILS_ENV'] ||= 'test'
 require 'simplecov'
 SimpleCov.start 'rails' do
   add_group 'Services', 'app/services'
+  add_filter '/channels/'
+  add_filter '/jobs/'
+  add_filter '/mailers/'
 end
 
 require File.expand_path('../config/environment', __dir__)
