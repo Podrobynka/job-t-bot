@@ -72,9 +72,9 @@ RSpec.describe TelegramWebhooksController, telegram_bot: :rails do
       context 'when user didn\'t check projects' do
         let!(:user_skill) { create(:user_skill, user: user) }
         let(:message) do
-          "Форма загрузки файлов с поддержкой .tiff на WP\nPHP, Web programming" \
-          "\nhttps://freelancehunt.com/project/forma-zagruzki-faylov-podderzhko" \
-          'y-tiff/812694.html'
+          "\u{1F4A1} Форма загрузки файлов с поддержкой .tiff на WP\n\u{1F4CD}" \
+          " #php, #web_programming\n\u{1F680} https://freelancehunt.com/" \
+          'project/forma-zagruzki-faylov-podderzhkoy-tiff/812694.html'
         end
 
         it { should respond_with_message message }
@@ -110,9 +110,9 @@ RSpec.describe TelegramWebhooksController, telegram_bot: :rails do
 
       context 'when user didn\'t check projects' do
         let(:message) do
-          "Форма загрузки файлов с поддержкой .tiff на WP\nPHP, Web " \
-          "programming\nhttps://freelancehunt.com/project/forma-zagruzki-" \
-          'faylov-podderzhkoy-tiff/812694.html'
+          "\u{1F4A1} Форма загрузки файлов с поддержкой .tiff на WP\n\u{1F4CD}" \
+          " #php, #web_programming\n\u{1F680} https://freelancehunt.com/" \
+          'project/forma-zagruzki-faylov-podderzhkoy-tiff/812694.html'
         end
 
         it { should respond_with_message message }
