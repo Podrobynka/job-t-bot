@@ -87,15 +87,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def skills_list(skills, action_key = nil)
-    skills_list = []
-    skills.map do |skill|
-      skills_list << {
-        text: skill[:name],
-        callback_data: { "#{action_key}callback_query": skill[:id] }.to_json
-      }
-    end
-
-    skills_list.each_slice(2).to_a
+    Adapters::Skills.call(skills, action_key)
   end
 
   def user_skills_ids
@@ -110,20 +102,14 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     end
   end
 
-  def project(item)
-    [item.dig(:attributes, :name), "\n",
-     item.dig(:attributes, :skills).pluck(:name).join(', '), "\n",
-     item.dig(:links, :self, :web)].join
-  end
-
   def show_projects(action_key, date = nil)
     if user_skills_ids.empty?
       respond_with :message, text: t(".#{action_key}.no_skills_selected")
     elsif projects(date).empty?
       respond_with :message, text: t(".#{action_key}.no_projects")
     else
-      projects(date).each do |pr|
-        respond_with :message, text: project(pr)
+      Adapters::Projects.call(projects(date)).each do |project|
+        respond_with :message, text: project
       end
     end
   end

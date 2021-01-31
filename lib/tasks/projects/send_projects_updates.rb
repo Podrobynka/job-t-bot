@@ -40,14 +40,9 @@ module Tasks
 
       def send_updates(project, chats)
         chats.each do |chat|
-          Telegram.bot.send_message(chat_id: chat, text: project(project))
+          Telegram.bot.send_message(chat_id: chat,
+                                    text: Adapters::Projects.call([project]))
         end
-      end
-
-      def project(item)
-        [item.dig(:attributes, :name), "\n",
-         item.dig(:attributes, :skills).pluck(:name).join(', '), "\n",
-         item.dig(:links, :self, :web)].join
       end
     end
   end
