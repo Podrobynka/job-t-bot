@@ -41,7 +41,7 @@ module Tasks
       def send_updates(project, chats)
         chats.each do |chat|
           Telegram.bot.send_message(chat_id: chat,
-                                    text: Adapters::Projects.call([project]))
+                                    text: Adapters::Projects.call([project])[0])
         end
       end
     end

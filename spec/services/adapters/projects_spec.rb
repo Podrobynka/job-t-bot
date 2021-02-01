@@ -7,8 +7,9 @@ RSpec.describe Adapters::Projects, :aggregate_failures, vcr: vcr do
   let(:skill_ids) { [1, 2] }
   let(:adaptee) { Freelancehunt::GetProjectsService.call(skill_ids) }
   let(:result) do
-    "TRADEBOT Онлаин Steam обмен площадка\nNode.js, PHP\nhttps://freelancehun" \
-    't.com/project/tradebot-onlain-steam-obmen-ploschadka/796357.html'
+    "\u{1F4A1} TRADEBOT Онлаин Steam обмен площадка\n\u{1F4CD} #node_js, #php"
+    "\n\u{1F680} https://freelancehunt.com/project/tradebot-onlain-steam-" \
+    'obmen-ploschadka/796357.html'
   end
 
   subject { described_class.call(adaptee) }
