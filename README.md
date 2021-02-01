@@ -39,8 +39,8 @@ Bot uses Redis for external requests caching.
 * Install heroku CLI on you local machine
 * Create app
 * Install add-ons:
-  * _heroku-postgresql
-  * _heroku-redis
+  * _Heroku Postgres_
+  * _Heroku Redis_
   * _Heroku Scheduler_ and create job `bundle exec rake send_projects_updates`
 * Add GitHub repo to heroku app
 * Create dyno with code inside: `bot bundle exec rake telegram:bot:poller PORT=$PORT` and toggle it to on
